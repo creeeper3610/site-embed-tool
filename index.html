@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウェブサイト埋め込みツール</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        .header {
+            padding: 15px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+            transition: margin-top 0.3s ease; /* スムーズに隠すアニメーション */
+        }
+        /* バーを非表示にするクラス */
+        .header.hidden {
+            margin-top: -74px; /* バーの高さ分上にずらして隠す */
+        }
+        input[type="url"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .toggle-btn {
+            background-color: #6c757d;
+        }
+        .toggle-btn:hover {
+            background-color: #5a6268;
+        }
+        /* バーが隠れている時に浮かび上がる復活ボタン */
+        .show-bar-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            padding: 5px 10px;
+            background-color: rgba(0, 123, 255, 0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+        .show-bar-btn:hover {
+            background-color: rgba(0, 123, 255, 1);
+        }
+        .container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff;
+        }
+        .error-notice {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background-color: transparent;
+            color: #666666;
+            padding: 0;
+            display: none;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 上部入力バー -->
+    <div class="header" id="headerBar">
+        <input type="url" id="urlInput" placeholder="https://example.com 形式でURLを入力してください" value="https://www.google.com/webhp?igu=1" onkeydown="handleKeyDown(event)">
+        <button onclick="embedSite()">埋め込む</button>
+        <button class="toggle-btn" onclick="toggleHeader(true)">バーを隠す</button>
+    </div>
+
+    <!-- バーが隠れた時だけ表示される復活ボタン -->
+    <button class="show-bar-btn" id="showBarBtn" onclick="toggleHeader(false)">⚙️ バーを表示</button>
+
+    <div class="container">
+        <div id="errorNotice" class="error-notice">
+            ⚠️ サイトが表示されない場合、そのサイトがセキュリティ制限（iframe拒否）を設定している可能性があります。
+        </div>
+        <!-- 全画面表示を許可する属性（allow="fullscreen" など）を追加 -->
+        <iframe id="siteViewer" src="https://www.google.com/webhp?igu=1" allow="fullscreen" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        function handleKeyDown(event) {
+            if (event.key === 'Enter') {
+                embedSite();
+            }
+        }
+
+        function embedSite() {
+            const urlInput = document.getElementById('urlInput').value.trim();
+            const iframe = document.getElementById('siteViewer');
+            const errorNotice = document.getElementById('errorNotice');
+
+            if (!urlInput) {
+                alert('URLを入力してください。');
+                return;
+            }
+
+            if (!urlInput.startsWith('http://') && !urlInput.startsWith('https://')) {
+                alert('URLは http:// または https:// から始めてください。');
+                return;
+            }
+
+            iframe.src = urlInput;
+
+            errorNotice.style.display = 'block';
+            setTimeout(() => {
+                errorNotice.style.opacity = '0';
+                setTimeout(() => {
+                    errorNotice.style.display = 'none';
+                    errorNotice.style.opacity = '1';
+                }, 500);
+            }, 7000);
+        }
+
+        // 上部バーの表示・非表示を切り替える関数
+        function toggleHeader(hide) {
+            const headerBar = document.getElementById('headerBar');
+            const showBarBtn = document.getElementById('showBarBtn');
+            
+            if (hide) {
+                headerBar.classList.add('hidden');
+                showBarBtn.style.display = 'block';
+            } else {
+                headerBar.classList.remove('hidden');
+                showBarBtn.style.display = 'none';
+            }
+        }
+    </script>
+
+</body>
+</html>
